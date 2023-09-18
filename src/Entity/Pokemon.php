@@ -2,17 +2,12 @@
 
 namespace App\Entity;
 
-use ApiPlatform\Doctrine\Orm\Filter\BooleanFilter;
-use ApiPlatform\Doctrine\Orm\Filter\SearchFilter;
-use ApiPlatform\Metadata\ApiFilter;
 use ApiPlatform\Metadata\ApiResource;
 use App\Repository\PokemonRepository;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: PokemonRepository::class)]
-#[ApiResource(
-    paginationItemsPerPage: 50
-)]
+#[ApiResource]
 class Pokemon
 {
     #[ORM\Id]
@@ -24,15 +19,12 @@ class Pokemon
     private ?int $pokedexId = null;
 
     #[ORM\Column(length: 255)]
-    #[ApiFilter(SearchFilter::class, strategy: 'partial')]
     private ?string $name = null;
 
     #[ORM\Column(length: 255)]
-    #[ApiFilter(SearchFilter::class, strategy: 'partial')]
     private ?string $type1 = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[ApiFilter(SearchFilter::class, strategy: 'partial')]
     private ?string $type2 = null;
 
     #[ORM\Column]
@@ -60,7 +52,6 @@ class Pokemon
     private ?int $generation = null;
 
     #[ORM\Column]
-    #[ApiFilter(BooleanFilter::class)]
     private ?bool $legendary = null;
 
     public function getId(): ?int
