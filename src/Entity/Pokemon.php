@@ -7,7 +7,9 @@ use App\Repository\PokemonRepository;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: PokemonRepository::class)]
-#[ApiResource]
+#[ApiResource(
+    paginationItemsPerPage: 50
+)]
 class Pokemon
 {
     #[ORM\Id]
