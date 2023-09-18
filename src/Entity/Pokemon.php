@@ -15,6 +15,9 @@ class Pokemon
     #[ORM\Column]
     private ?int $id = null;
 
+    #[ORM\Column]
+    private ?int $pokedexId = null;
+
     #[ORM\Column(length: 255)]
     private ?string $name = null;
 
@@ -196,6 +199,18 @@ class Pokemon
     public function setLegendary(bool $legendary): static
     {
         $this->legendary = $legendary;
+
+        return $this;
+    }
+
+    public function getPokedexId(): ?int
+    {
+        return $this->pokedexId;
+    }
+
+    public function setPokedexId(int $pokedexId): static
+    {
+        $this->pokedexId = $pokedexId;
 
         return $this;
     }
