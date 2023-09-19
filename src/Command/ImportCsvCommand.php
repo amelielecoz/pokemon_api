@@ -2,7 +2,7 @@
 
 namespace App\Command;
 
-use App\DataFixtures\PokemonFixtures;
+use App\DataFixtures\AppFixtures;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -37,7 +37,7 @@ class ImportCsvCommand extends Command
         if ($filepath) {
             $io->note(sprintf('Import has just started from the file located at : %s', $filepath));
 
-            $fixtures = new PokemonFixtures($filepath);
+            $fixtures = new AppFixtures($filepath, $output);
 
             $fixtures->load($this->manager);
 
