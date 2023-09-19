@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\TypeRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: TypeRepository::class)]
@@ -16,9 +18,13 @@ class Type
     #[ORM\Column(length: 255, unique: true)]
     private ?string $name = null;
 
-    #[ORM\ManyToOne(inversedBy: 'types')]
-    #[ORM\JoinColumn(nullable: true)]
-    private ?Pokemon $pokemon = null;
+    #[ORM\ManyToMany(targetEntity: Pokemon::class, inversedBy: 'types')]
+    private Collection $pokemons;
+
+    public function __construct()
+    {
+        $this->pokemons = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -37,14 +43,26 @@ class Type
         return $this;
     }
 
-    public function getPokemon(): ?Pokemon
+    /**
+     * @return Collection<int, Pokemon>
+     */
+    public function getPokemons(): Collection
     {
-        return $this->pokemon;
+        return $this->pokemons;
     }
 
-    public function setPokemon(?Pokemon $pokemon): static
+    public function addPokemon(Pokemon $pokemon): static
     {
-        $this->pokemon = $pokemon;
+        if (!$this->pokemons->contains($pokemon)) {
+            $this->pokemons->add($pokemon);
+        }
+
+        return $this;
+    }
+
+    public function removePokemon(Pokemon $pokemon): static
+    {
+        $this->pokemons->removeElement($pokemon);
 
         return $this;
     }

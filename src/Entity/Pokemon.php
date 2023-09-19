@@ -50,7 +50,7 @@ class Pokemon
     #[ORM\Column]
     private ?bool $legendary = null;
 
-    #[ORM\OneToMany(mappedBy: 'pokemon', targetEntity: Type::class)]
+    #[ORM\ManyToMany(targetEntity: Type::class, mappedBy: 'pokemons')]
     private Collection $types;
 
     public function __construct()
@@ -207,7 +207,7 @@ class Pokemon
     {
         if (!$this->types->contains($type)) {
             $this->types->add($type);
-            $type->setPokemon($this);
+            $type->addPokemon($this);
         }
 
         return $this;
@@ -216,10 +216,7 @@ class Pokemon
     public function removeType(Type $type): static
     {
         if ($this->types->removeElement($type)) {
-            // set the owning side to null (unless already changed)
-            if ($type->getPokemon() === $this) {
-                $type->setPokemon(null);
-            }
+            $type->removePokemon($this);
         }
 
         return $this;
