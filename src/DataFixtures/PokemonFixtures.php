@@ -3,11 +3,9 @@
 namespace App\DataFixtures;
 
 use App\Entity\Pokemon;
+use App\Entity\Type;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
-use Symfony\Component\Finder\Finder;
-
-;
 
 class PokemonFixtures extends Fixture
 {
@@ -25,36 +23,36 @@ class PokemonFixtures extends Fixture
     const COLUMN_GENERATION = 11;
     const COLUMN_LEGENDARY = 12;
 
-    public function __construct(private readonly string $filepath) {}
+    public function __construct(
+        private readonly array $data,
+    ) {}
 
     public function load(ObjectManager $manager): void
     {
-        $row = 1;
-        if(($handle = fopen($this->filepath, "r")) !== false) {
-            $flag = true;
-            while (($data = fgetcsv($handle, 1000, ',')) !== false) {
-                if($flag) { $flag = false; continue; } //allows to skip headers (first row)
-                $row++;
-                $pokemon = new Pokemon();
-                $pokemon->setPokedexId(intval($data[self::COLUMN_POKEDEX_ID]));
-                $pokemon->setName($data[self::COLUMN_NAME]);
-                $pokemon->setType1($data[self::COLUMN_TYPE_1]);
-                $pokemon->setType2($data[self::COLUMN_TYPE_2]);
-                $pokemon->setTotal(intval($data[self::COLUMN_TOTAL]));
-                $pokemon->setHitPoint(intval($data[self::COLUMN_HIT_POINT]));
-                $pokemon->setAttack(intval($data[self::COLUMN_ATTACK]));
-                $pokemon->setDefense(intval($data[self::COLUMN_DEFENSE]));
-                $pokemon->setSpecialAttack(intval($data[self::COLUMN_SPECIAL_ATTACK]));
-                $pokemon->setSpecialDefense(intval($data[self::COLUMN_SPECIAL_DEFENSE]));
-                $pokemon->setSpeed(intval($data[self::COLUMN_SPEED]));
-                $pokemon->setGeneration(intval($data[self::COLUMN_GENERATION]));
-                $pokemon->setLegendary($data[self::COLUMN_LEGENDARY]);
-                $manager->persist($pokemon);
-                $manager->flush();
-            }
-            fclose($handle);
+        $typeRepository = $manager->getRepository(Type::class);
+        $pokemon = new Pokemon();
+
+        $pokemon->setPokedexId(intval($this->data[self::COLUMN_POKEDEX_ID]));
+        $pokemon->setName($this->data[self::COLUMN_NAME]);
+
+        if ($this->data[self::COLUMN_TYPE_1]) {
+            $pokemon->addType($typeRepository->findOneBy(['name' => $this->data[self::COLUMN_TYPE_1]]));
         }
 
+        if ($this->data[self::COLUMN_TYPE_2]) {
+            $pokemon->addType($typeRepository->findOneBy(['name' => $this->data[self::COLUMN_TYPE_2]]));
+        }
 
+        $pokemon->setTotal(intval($this->data[self::COLUMN_TOTAL]));
+        $pokemon->setHitPoint(intval($this->data[self::COLUMN_HIT_POINT]));
+        $pokemon->setAttack(intval($this->data[self::COLUMN_ATTACK]));
+        $pokemon->setDefense(intval($this->data[self::COLUMN_DEFENSE]));
+        $pokemon->setSpecialAttack(intval($this->data[self::COLUMN_SPECIAL_ATTACK]));
+        $pokemon->setSpecialDefense(intval($this->data[self::COLUMN_SPECIAL_DEFENSE]));
+        $pokemon->setSpeed(intval($this->data[self::COLUMN_SPEED]));
+        $pokemon->setGeneration(intval($this->data[self::COLUMN_GENERATION]));
+        $pokemon->setLegendary($this->data[self::COLUMN_LEGENDARY]);
+        $manager->persist($pokemon);
+        $manager->flush();
     }
 }

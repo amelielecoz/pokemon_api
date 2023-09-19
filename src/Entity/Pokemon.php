@@ -4,6 +4,8 @@ namespace App\Entity;
 
 use ApiPlatform\Metadata\ApiResource;
 use App\Repository\PokemonRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: PokemonRepository::class)]
@@ -20,12 +22,6 @@ class Pokemon
 
     #[ORM\Column(length: 255)]
     private ?string $name = null;
-
-    #[ORM\Column(length: 255)]
-    private ?string $type1 = null;
-
-    #[ORM\Column(length: 255, nullable: true)]
-    private ?string $type2 = null;
 
     #[ORM\Column]
     private ?int $total = null;
@@ -54,6 +50,14 @@ class Pokemon
     #[ORM\Column]
     private ?bool $legendary = null;
 
+    #[ORM\OneToMany(mappedBy: 'pokemon', targetEntity: Type::class)]
+    private Collection $types;
+
+    public function __construct()
+    {
+        $this->types = new ArrayCollection();
+    }
+
     public function getId(): ?int
     {
         return $this->id;
@@ -67,30 +71,6 @@ class Pokemon
     public function setName(string $name): static
     {
         $this->name = $name;
-
-        return $this;
-    }
-
-    public function getType1(): ?string
-    {
-        return $this->type1;
-    }
-
-    public function setType1(string $type1): static
-    {
-        $this->type1 = $type1;
-
-        return $this;
-    }
-
-    public function getType2(): ?string
-    {
-        return $this->type2;
-    }
-
-    public function setType2(?string $type2): static
-    {
-        $this->type2 = $type2;
 
         return $this;
     }
@@ -211,6 +191,36 @@ class Pokemon
     public function setPokedexId(int $pokedexId): static
     {
         $this->pokedexId = $pokedexId;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Type>
+     */
+    public function getTypes(): Collection
+    {
+        return $this->types;
+    }
+
+    public function addType(Type $type): static
+    {
+        if (!$this->types->contains($type)) {
+            $this->types->add($type);
+            $type->setPokemon($this);
+        }
+
+        return $this;
+    }
+
+    public function removeType(Type $type): static
+    {
+        if ($this->types->removeElement($type)) {
+            // set the owning side to null (unless already changed)
+            if ($type->getPokemon() === $this) {
+                $type->setPokemon(null);
+            }
+        }
 
         return $this;
     }
