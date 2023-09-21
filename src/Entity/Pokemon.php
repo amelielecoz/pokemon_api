@@ -9,7 +9,10 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: PokemonRepository::class)]
-#[ApiResource]
+#[ApiResource(
+    paginationClientItemsPerPage: true,
+    paginationItemsPerPage: 50,
+)]
 class Pokemon
 {
     #[ORM\Id]
