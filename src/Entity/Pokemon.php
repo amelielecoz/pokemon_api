@@ -2,6 +2,10 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Doctrine\Orm\Filter\BooleanFilter;
+use ApiPlatform\Doctrine\Orm\Filter\NumericFilter;
+use ApiPlatform\Doctrine\Orm\Filter\SearchFilter;
+use ApiPlatform\Metadata\ApiFilter;
 use ApiPlatform\Metadata\ApiResource;
 use App\Repository\PokemonRepository;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -24,6 +28,7 @@ class Pokemon
     private ?int $pokedexId = null;
 
     #[ORM\Column(length: 255)]
+    #[ApiFilter(SearchFilter::class, strategy: 'ipartial')]
     private ?string $name = null;
 
     #[ORM\Column]
@@ -48,12 +53,15 @@ class Pokemon
     private ?int $speed = null;
 
     #[ORM\Column]
+    #[ApiFilter(NumericFilter::class)]
     private ?int $generation = null;
 
     #[ORM\Column]
+    #[ApiFilter(BooleanFilter::class)]
     private ?bool $legendary = null;
 
     #[ORM\ManyToMany(targetEntity: Type::class, mappedBy: 'pokemons')]
+    #[ApiFilter(SearchFilter::class, properties: ['types.name' => 'ipartial'])]
     private Collection $types;
 
     public function __construct()
