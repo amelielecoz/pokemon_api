@@ -2,55 +2,106 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Doctrine\Orm\Filter\BooleanFilter;
+use ApiPlatform\Doctrine\Orm\Filter\NumericFilter;
+use ApiPlatform\Doctrine\Orm\Filter\SearchFilter;
+use ApiPlatform\Metadata\ApiFilter;
 use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Delete;
+use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\Patch;
+use ApiPlatform\Metadata\Post;
 use App\Repository\PokemonRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: PokemonRepository::class)]
-#[ApiResource]
+#[ApiResource(
+    operations: [
+        new Get(),
+        new Post(),
+        new GetCollection(),
+        new Patch(),
+        new Delete(),
+    ],
+    normalizationContext: [
+    'groups' => ['pokemon:read']
+],
+    denormalizationContext: [
+        'groups' => 'pokemon:write'
+    ],
+    paginationClientItemsPerPage: true,
+    paginationItemsPerPage: 50,
+)]
+#[UniqueEntity(fields: ['name'], message: 'It looks like another Pokemon already has this name !')]
 class Pokemon
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['pokemon:read'])]
     private ?int $id = null;
 
     #[ORM\Column]
-    private ?int $pokedexId = null;
+    #[Groups(['pokemon:read'])]
+    private int $pokedexId = 0;
 
     #[ORM\Column(length: 255)]
+    #[ApiFilter(SearchFilter::class, strategy: 'ipartial')]
+    #[Groups(['pokemon:read', 'pokemon:write'])]
+    #[Assert\NotBlank]
+    #[Assert\Length(min: 2, max: 20, maxMessage: 'Give a name to your pokemon, 20 chars or less.')]
     private ?string $name = null;
 
     #[ORM\Column]
+    #[Groups(['pokemon:read'])]
     private ?int $total = null;
 
     #[ORM\Column]
+    #[Groups(['pokemon:read'])]
     private ?int $hitPoint = null;
 
     #[ORM\Column]
+    #[Groups(['pokemon:read'])]
     private ?int $attack = null;
 
     #[ORM\Column]
+    #[Groups(['pokemon:read'])]
     private ?int $defense = null;
 
     #[ORM\Column]
+    #[Groups(['pokemon:read'])]
     private ?int $specialAttack = null;
 
     #[ORM\Column]
+    #[Groups(['pokemon:read'])]
     private ?int $specialDefense = null;
 
     #[ORM\Column]
+    #[Groups(['pokemon:read'])]
     private ?int $speed = null;
 
     #[ORM\Column]
+    #[ApiFilter(NumericFilter::class)]
+    #[Groups(['pokemon:read', 'pokemon:write'])]
+    #[Assert\GreaterThanOrEqual(1)]
+    #[Assert\LessThanOrEqual(6)]
     private ?int $generation = null;
 
     #[ORM\Column]
-    private ?bool $legendary = null;
+    #[ApiFilter(BooleanFilter::class)]
+    #[Groups(['pokemon:read', 'pokemon:write'])]
+    private bool $legendary = false;
 
-    #[ORM\ManyToMany(targetEntity: Type::class, mappedBy: 'pokemons')]
+    #[ORM\ManyToMany(targetEntity: Type::class, mappedBy: 'pokemons' )]
+    #[ApiFilter(SearchFilter::class, properties: ['types.name' => 'ipartial'])]
+    #[Groups(['pokemon:write', 'pokemon:read', 'type:read'])]
+    #[Assert\Valid]
     private Collection $types;
 
     public function __construct()
